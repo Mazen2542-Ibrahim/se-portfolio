@@ -456,9 +456,10 @@ body.admin-bar .sep-hero { padding-top: 192px; }
 }
 
 .sep-hero-actions {
-	display:   flex;
-	gap:       10px;
-	flex-wrap: wrap;
+	display:     flex;
+	align-items: center;
+	gap:         10px;
+	flex-wrap:   wrap;
 }
 
 /* Buttons */
@@ -533,7 +534,7 @@ body.admin-bar .sep-hero { padding-top: 192px; }
 	border:        1px solid rgba( 0, 210, 106, 0.3 );
 	border-radius: 2px;
 	padding:       4px 12px;
-	margin-top:    16px;
+	margin-bottom: 12px;
 }
 .sep-badge-available::before {
 	content:          '';
@@ -548,10 +549,6 @@ body.admin-bar .sep-hero { padding-top: 192px; }
 @keyframes sep-pulse {
 	0%, 100% { opacity: 1; }
 	50%       { opacity: 0.4; }
-}
-
-.sep-hero-badge-row {
-	margin-top: 16px;
 }
 
 /* Mobile hero */

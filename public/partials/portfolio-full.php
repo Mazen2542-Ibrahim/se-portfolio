@@ -109,6 +109,11 @@ $section_ids  = array_merge(
 				<span class="sep-term-ps1">visitor@portfolio:~$</span>
 				<span class="sep-term-cmd"> whoami</span>
 			</div>
+			<?php if ( ! empty( $about['available'] ) ) : ?>
+				<span class="sep-badge-available">
+					<?php esc_html_e( 'Available for opportunities', 'se-portfolio' ); ?>
+				</span>
+			<?php endif; ?>
 			<div class="sep-hero-inner<?php echo $photo_url ? '' : ' sep-no-photo'; ?>">
 			<?php if ( $photo_url ) : ?>
 				<img
@@ -142,14 +147,6 @@ $section_ids  = array_merge(
 						</a>
 					<?php endif; ?>
 				</div>
-
-				<?php if ( ! empty( $about['available'] ) ) : ?>
-					<div class="sep-hero-badge-row">
-						<span class="sep-badge-available">
-							<?php esc_html_e( 'Available for opportunities', 'se-portfolio' ); ?>
-						</span>
-					</div>
-				<?php endif; ?>
 			</div>
 		</div><!-- /.sep-hero-inner -->
 		</div><!-- /.sep-term-body -->

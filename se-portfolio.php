@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'SEP_VERSION',     '1.0.2' );
+define( 'SEP_VERSION',     '1.0.4' );
 define( 'SEP_PLUGIN_DIR',  plugin_dir_path( __FILE__ ) );
 define( 'SEP_PLUGIN_URL',  plugin_dir_url( __FILE__ ) );
 define( 'SEP_PLUGIN_FILE', __FILE__ );
