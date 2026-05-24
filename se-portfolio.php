@@ -1,12 +1,12 @@
 <?php
 /**
  * Plugin Name:  SE Portfolio
- * Plugin URI:   https://github.com/example/se-portfolio
+ * Plugin URI:   https://github.com/Mazen2542-Ibrahim/se-portfolio
  * Description:  A production-ready portfolio plugin for Support Engineers and Programmers with a dark, terminal-inspired design.
- * Version:      1.0.0
+ * Version:      1.0.4
  * Requires at least: 6.4
  * Requires PHP: 8.1
- * Author:       Mazen
+ * Author:       Mazen Alghadouni
  * License:      GPL v2 or later
  * License URI:  https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain:  se-portfolio
