@@ -164,11 +164,14 @@ class SE_Portfolio_Public {
 	 *
 	 * @since 1.1.0
 	 */
-	public function inject_custom_styles(): void {
-		if ( ! $this->has_shortcode ) {
-			return;
-		}
-
+	/**
+	 * Builds the :root{} CSS custom-properties block from the saved sep_style option.
+	 * Shared by inject_custom_styles() and enqueue_login_assets().
+	 *
+	 * @since  1.1.0
+	 * @return string The :root{...} CSS declaration block.
+	 */
+	private function build_css_variables(): string {
 		$style    = get_option( 'sep_style', [] );
 		$defaults = SE_Portfolio_Style_Settings::get_defaults();
 
@@ -187,22 +190,18 @@ class SE_Portfolio_Public {
 
 		$lines = [];
 		foreach ( $color_vars as $key => $var ) {
-			$value    = isset( $style[ $key ] ) && '' !== $style[ $key ] ? $style[ $key ] : $defaults[ $key ];
+			$value   = isset( $style[ $key ] ) && '' !== $style[ $key ] ? $style[ $key ] : $defaults[ $key ];
 			$lines[] = $var . ':' . $value;
 		}
 
-		// Radius — pre-validated: digits + alphanumeric only.
 		$radius  = isset( $style['radius'] ) && '' !== $style['radius'] ? $style['radius'] : $defaults['radius'];
 		$lines[] = '--sep-radius:' . $radius;
 
-		// Font families — strip CSS injection chars that cannot appear in valid font names.
 		$font_mono = preg_replace( '/[{}<>]/', '', $style['font_mono'] ?? $defaults['font_mono'] );
 		$font_body = preg_replace( '/[{}<>]/', '', $style['font_body'] ?? $defaults['font_body'] );
 		$lines[]   = '--sep-font-mono:' . $font_mono;
 		$lines[]   = '--sep-font-body:' . $font_body;
 
-		// Design / spacing / sizing CSS variables.
-		// Values are pre-validated (alphanumeric + CSS-safe chars only) via sanitize_style().
 		$design_vars = [
 			'base_size'      => '--sep-base-size',
 			'section_py'     => '--sep-section-py',
@@ -217,7 +216,18 @@ class SE_Portfolio_Public {
 			$lines[] = $var . ':' . preg_replace( '/[{}<>]/', '', $value );
 		}
 
-		$css = ':root{' . implode( ';', $lines ) . '}';
+		return ':root{' . implode( ';', $lines ) . '}';
+	}
+
+	public function inject_custom_styles(): void {
+		if ( ! $this->has_shortcode && ! is_404() ) {
+			return;
+		}
+
+		$style    = get_option( 'sep_style', [] );
+		$defaults = SE_Portfolio_Style_Settings::get_defaults();
+
+		$css = $this->build_css_variables();
 
 		// Per-component overrides — scoped to each section's data attribute or class.
 		$component_selectors = [
@@ -294,7 +304,9 @@ class SE_Portfolio_Public {
 	}
 
 	public function enqueue_assets(): void {
-		if ( ! $this->has_shortcode ) {
+		$is_404 = is_404();
+
+		if ( ! $this->has_shortcode && ! $is_404 ) {
 			return;
 		}
 
@@ -313,18 +325,46 @@ class SE_Portfolio_Public {
 			SEP_VERSION
 		);
 
-		wp_enqueue_script(
-			'sep-portfolio',
-			SEP_PLUGIN_URL . 'public/js/portfolio.js',
-			[],
-			SEP_VERSION,
-			true
-		);
+		if ( ! $is_404 ) {
+			wp_enqueue_script(
+				'sep-portfolio',
+				SEP_PLUGIN_URL . 'public/js/portfolio.js',
+				[],
+				SEP_VERSION,
+				true
+			);
 
-		wp_localize_script( 'sep-portfolio', 'sepAjax', [
-			'ajaxurl' => admin_url( 'admin-ajax.php' ),
-			'nonce'   => wp_create_nonce( 'sep_load_more' ),
-		] );
+			wp_localize_script( 'sep-portfolio', 'sepAjax', [
+				'ajaxurl' => admin_url( 'admin-ajax.php' ),
+				'nonce'   => wp_create_nonce( 'sep_load_more' ),
+			] );
+		}
+
+		if ( $is_404 ) {
+			wp_enqueue_style(
+				'sep-404',
+				SEP_PLUGIN_URL . 'public/css/page-404.css',
+				[ 'sep-portfolio' ],
+				SEP_VERSION
+			);
+		}
+	}
+
+	/**
+	 * Replaces WordPress's 404 template with the plugin's terminal-themed 404 page.
+	 *
+	 * @since  1.1.0
+	 * @param  string $template Resolved template file path.
+	 * @return string           Plugin's 404 template path when is_404(), otherwise unchanged.
+	 */
+	public function template_404( string $template ): string {
+		if ( is_404() ) {
+			$custom = SEP_PLUGIN_DIR . 'public/partials/page-404.php';
+			if ( file_exists( $custom ) ) {
+				return $custom;
+			}
+		}
+		return $template;
 	}
 
 	// -------------------------------------------------------------------------
@@ -612,6 +652,73 @@ class SE_Portfolio_Public {
 			'html'      => $html,
 			'max_pages' => (int) $query->max_num_pages,
 		] );
+	}
+
+	// -------------------------------------------------------------------------
+	// Login Page
+	// -------------------------------------------------------------------------
+
+	/**
+	 * Enqueues the portfolio CSS and login-specific override CSS on wp-login.php,
+	 * and injects the CSS custom-property block as an inline style.
+	 *
+	 * @since 1.1.0
+	 */
+	public function enqueue_login_assets(): void {
+		wp_enqueue_style(
+			'sep-google-fonts',
+			'https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;500;600&display=swap',
+			[],
+			null
+		);
+
+		wp_enqueue_style(
+			'sep-portfolio',
+			SEP_PLUGIN_URL . 'public/css/portfolio.css',
+			[ 'sep-google-fonts' ],
+			SEP_VERSION
+		);
+
+		wp_add_inline_style( 'sep-portfolio', $this->build_css_variables() );
+
+		wp_enqueue_style(
+			'sep-login',
+			SEP_PLUGIN_URL . 'public/css/page-login.css',
+			[ 'sep-portfolio' ],
+			SEP_VERSION
+		);
+	}
+
+	/**
+	 * Adds a body class to the login page for scoping.
+	 *
+	 * @since  1.1.0
+	 * @param  string[] $classes
+	 * @return string[]
+	 */
+	public function login_body_class( array $classes ): array {
+		$classes[] = 'sep-login-page';
+		return $classes;
+	}
+
+	/**
+	 * Points the login logo link to the site home page.
+	 *
+	 * @since  1.1.0
+	 * @return string
+	 */
+	public function login_header_url(): string {
+		return home_url( '/' );
+	}
+
+	/**
+	 * Replaces "Powered by WordPress" logo alt text with the site name.
+	 *
+	 * @since  1.1.0
+	 * @return string
+	 */
+	public function login_header_text(): string {
+		return get_bloginfo( 'name' );
 	}
 
 	/**

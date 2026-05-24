@@ -3,7 +3,7 @@
  * Plugin Name:  SE Portfolio
  * Plugin URI:   https://github.com/Mazen2542-Ibrahim/se-portfolio
  * Description:  A production-ready portfolio plugin for Support Engineers and Programmers with a dark, terminal-inspired design.
- * Version:      1.0.6
+ * Version:      1.1.0
  * Requires at least: 6.4
  * Requires PHP: 8.1
  * Author:       Mazen Alghadouni
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'SEP_VERSION',     '1.0.6' );
+define( 'SEP_VERSION',     '1.1.0' );
 define( 'SEP_PLUGIN_DIR',  plugin_dir_path( __FILE__ ) );
 define( 'SEP_PLUGIN_URL',  plugin_dir_url( __FILE__ ) );
 define( 'SEP_PLUGIN_FILE', __FILE__ );

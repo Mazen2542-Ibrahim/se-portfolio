@@ -101,12 +101,17 @@ class SE_Portfolio {
 
 	private function define_public_hooks(): void {
 		$public = new SE_Portfolio_Public();
-		add_action( 'init',              [ $public, 'register_shortcodes' ] );
+		add_action( 'init',               [ $public, 'register_shortcodes' ] );
 		add_action( 'wp_enqueue_scripts', [ $public, 'enqueue_assets' ] );
-		add_filter( 'the_posts',         [ $public, 'detect_shortcodes' ] );
-		add_action( 'wp_head',           [ $public, 'inject_page_overrides' ] );
-		add_action( 'wp_head',           [ $public, 'inject_custom_styles' ], 15 );
-		add_action( 'wp_head',           [ $public, 'inject_favicon' ], 1 );
+		add_filter( 'the_posts',          [ $public, 'detect_shortcodes' ] );
+		add_action( 'wp_head',            [ $public, 'inject_page_overrides' ] );
+		add_action( 'wp_head',            [ $public, 'inject_custom_styles' ], 15 );
+		add_action( 'wp_head',            [ $public, 'inject_favicon' ], 1 );
+		add_filter( 'template_include',   [ $public, 'template_404' ] );
+		add_action( 'login_enqueue_scripts', [ $public, 'enqueue_login_assets' ] );
+		add_filter( 'login_body_class',      [ $public, 'login_body_class' ] );
+		add_filter( 'login_headerurl',       [ $public, 'login_header_url' ] );
+		add_filter( 'login_headertext',      [ $public, 'login_header_text' ] );
 	}
 
 	private function define_rest_hooks(): void {

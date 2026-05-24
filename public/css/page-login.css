@@ -1,0 +1,307 @@
+/* SE Portfolio — Login Page Styles
+ * Restyles wp-login.php to match the terminal / GitHub dark aesthetic.
+ * All colour and font values are driven by --sep-* CSS custom properties,
+ * which are injected as an inline style block via enqueue_login_assets().
+ * ============================================================ */
+
+/* ---- Page background ---- */
+body.login {
+	background:  var( --sep-bg );
+	font-family: var( --sep-font-mono );
+}
+
+/* Prevent a white flash before styles load */
+html {
+	background: var( --sep-bg );
+}
+
+/* ---- Login box: terminal window shape ---- */
+body.login #login {
+	width:         360px;
+	padding:       44px 0 0;   /* space reserved for the chrome bar */
+	background:    var( --sep-surface );
+	border:        1px solid var( --sep-border );
+	border-radius: var( --sep-radius );
+	position:      relative;
+	margin-top:    10vh;
+	/* Remove WP default box-shadow */
+	box-shadow:    none;
+}
+
+/* ---- Chrome bar background (::before) ---- */
+body.login #login::before {
+	content:       '';
+	position:      absolute;
+	top:  0;
+	left: 0;
+	right: 0;
+	height:        44px;
+	background:    var( --sep-surface2 );
+	border-bottom: 1px solid var( --sep-border );
+	border-radius: var( --sep-radius ) var( --sep-radius ) 0 0;
+}
+
+/* ---- Three traffic-light dots via box-shadow trick (::after) ---- */
+body.login #login::after {
+	content:       '';
+	position:      absolute;
+	top:           16px;
+	left:          16px;
+	width:         11px;
+	height:        11px;
+	border-radius: 50%;
+	background:    #ff5f57;                          /* close — red   */
+	box-shadow:    19px 0 0 #febc2e, 38px 0 0 #28c840; /* min, max dots */
+	pointer-events: none;
+}
+
+/* ---- h1 logo: repositioned into the chrome bar as the site name ---- */
+body.login #login h1 {
+	position:    absolute;
+	top:         0;
+	left:        0;
+	right:       0;
+	height:      44px;
+	margin:      0;
+	display:     flex;
+	align-items: center;
+	justify-content: center;
+	z-index:     2;
+}
+
+body.login #login h1 a {
+	background-image: none !important; /* remove the WP logo */
+	width:       auto;
+	height:      auto;
+	text-indent: 0;
+	overflow:    visible;
+	font-size:   12px;
+	color:       var( --sep-muted );
+	font-family: var( --sep-font-mono );
+	font-weight: 400;
+	text-decoration: none;
+	display:     block;
+	padding:     0;
+	/* WordPress sets font-size: 0 and text-indent: -9999px on the logo link */
+	line-height: normal;
+}
+
+body.login #login h1 a:focus,
+body.login #login h1 a:hover {
+	color:      var( --sep-text );
+	box-shadow: none;
+	outline:    none;
+}
+
+/* ---- Form container ---- */
+body.login form {
+	margin-top:    0;
+	padding:       20px 26px 26px;
+	background:    transparent !important;
+	border:        none !important;
+	box-shadow:    none !important;
+	border-radius: 0;
+}
+
+/* ---- Labels ---- */
+body.login form label {
+	color:          var( --sep-muted );
+	font-size:      11px;
+	font-family:    var( --sep-font-mono );
+	text-transform: uppercase;
+	letter-spacing: 0.06em;
+	display:        block;
+	margin-bottom:  4px;
+}
+
+/* ---- Text / password inputs ---- */
+body.login input[type="text"],
+body.login input[type="password"] {
+	background:    var( --sep-bg ) !important;
+	border:        1px solid var( --sep-border ) !important;
+	border-radius: var( --sep-radius ) !important;
+	color:         var( --sep-text ) !important;
+	font-family:   var( --sep-font-mono ) !important;
+	font-size:     14px !important;
+	padding:       9px 12px !important;
+	box-shadow:    none !important;
+	transition:    border-color var( --sep-transition ), box-shadow var( --sep-transition );
+	width:         100%;
+}
+
+body.login input[type="text"]:focus,
+body.login input[type="password"]:focus {
+	border-color: var( --sep-accent ) !important;
+	box-shadow:   0 0 0 1px var( --sep-accent ) !important;
+	outline:      none;
+}
+
+/* ---- Submit button ---- */
+body.login .button-primary,
+body.login input[type="submit"] {
+	background:    var( --sep-accent ) !important;
+	border-color:  var( --sep-accent ) !important;
+	color:         #0a0c10 !important;
+	font-family:   var( --sep-font-mono ) !important;
+	font-weight:   600 !important;
+	font-size:     14px !important;
+	border-radius: var( --sep-radius ) !important;
+	padding:       9px 20px !important;
+	box-shadow:    none !important;
+	text-shadow:   none !important;
+	width:         100%;
+	transition:    opacity var( --sep-transition ), box-shadow var( --sep-transition ) !important;
+	cursor:        pointer;
+}
+
+body.login .button-primary:hover,
+body.login .button-primary:focus,
+body.login input[type="submit"]:hover,
+body.login input[type="submit"]:focus {
+	background:   var( --sep-accent ) !important;
+	border-color: var( --sep-accent ) !important;
+	color:        #0a0c10 !important;
+	box-shadow:   0 0 10px rgba( 0, 210, 106, 0.35 ) !important;
+	opacity:      0.88;
+	outline:      none;
+}
+
+/* ---- Remember Me ---- */
+body.login #loginform p.forgetmenot {
+	display:       flex !important;
+	align-items:   center !important;
+	gap:           6px !important;
+	margin-bottom: 14px !important;
+	margin-top:    0 !important;
+}
+
+body.login #loginform p.forgetmenot label {
+	color:          var( --sep-muted ) !important;
+	font-size:      12px !important;
+	text-transform: none !important;
+	letter-spacing: normal !important;
+	display:        flex !important;
+	align-items:    center !important;
+	gap:            6px !important;
+	margin-bottom:  0 !important;
+	cursor:         pointer;
+}
+
+body.login #loginform input[type="checkbox"] {
+	-webkit-appearance: none !important;
+	appearance:         none !important;
+	width:              14px !important;
+	height:             14px !important;
+	min-width:          14px !important;
+	background:         var( --sep-bg, #0d1117 ) !important;
+	border:             1px solid var( --sep-border, #30363d ) !important;
+	border-radius:      2px !important;
+	cursor:             pointer;
+	position:           relative !important;
+	flex-shrink:        0;
+	box-shadow:         none !important;
+	transition:         background var( --sep-transition ), border-color var( --sep-transition );
+}
+
+body.login #loginform input[type="checkbox"]:checked {
+	background:   var( --sep-accent, #3fb950 ) !important;
+	border-color: var( --sep-accent, #3fb950 ) !important;
+}
+
+body.login #loginform input[type="checkbox"]:checked::after {
+	content:     '✓';
+	position:    absolute;
+	top:         -1px;
+	left:        2px;
+	font-size:   11px;
+	line-height: 1;
+	color:       #0a0c10;
+	font-weight: 700;
+}
+
+body.login #loginform input[type="checkbox"]:focus-visible {
+	outline:        2px solid var( --sep-accent, #3fb950 ) !important;
+	outline-offset: 2px;
+}
+
+/* ---- Navigation links (lost password / back to site) ---- */
+body.login #nav,
+body.login #backtoblog {
+	text-align:  center;
+	padding:     10px 24px;
+	background:  transparent !important;
+	border:      none !important;
+	box-shadow:  none !important;
+}
+
+body.login #nav a,
+body.login #backtoblog a {
+	color:           var( --sep-prompt ) !important;
+	font-family:     var( --sep-font-mono );
+	font-size:       13px;
+	text-decoration: none;
+	transition:      color var( --sep-transition );
+}
+
+body.login #nav a:hover,
+body.login #backtoblog a:hover {
+	color:           var( --sep-accent ) !important;
+	text-decoration: underline;
+}
+
+/* ---- Error / info / success messages ---- */
+body.login #login_error,
+body.login .message,
+body.login .success {
+	background:    var( --sep-surface2 );
+	border:        1px solid var( --sep-border );
+	border-left:   3px solid var( --sep-warning );
+	border-radius: var( --sep-radius );
+	color:         var( --sep-text );
+	font-family:   var( --sep-font-mono );
+	font-size:     13px;
+	line-height:   1.6;
+	box-shadow:    none;
+	margin-bottom: 0;
+	padding:       10px 14px;
+}
+
+body.login .message,
+body.login .success {
+	border-left-color: var( --sep-accent );
+}
+
+body.login #login_error a,
+body.login .message a,
+body.login .success a {
+	color: var( --sep-prompt );
+}
+
+/* ---- Language switcher (if present) ---- */
+body.login .language-switcher select {
+	background:    var( --sep-surface );
+	border:        1px solid var( --sep-border );
+	border-radius: var( --sep-radius );
+	color:         var( --sep-text );
+	font-family:   var( --sep-font-mono );
+	font-size:     13px;
+	padding:       6px 10px;
+}
+
+/* ---- Privacy policy link ---- */
+body.login .privacy-policy-page-link a {
+	color:      var( --sep-muted );
+	font-size:  12px;
+	font-family: var( --sep-font-mono );
+}
+
+/* ---- Powered-by footer link ---- */
+body.login #login_footer a {
+	color: var( --sep-muted );
+}
+
+/* ---- Focus visible (accessibility) ---- */
+body.login *:focus-visible {
+	outline: 2px solid var( --sep-accent );
+	outline-offset: 2px;
+}
