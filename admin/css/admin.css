@@ -1,0 +1,24 @@
+/* SE Portfolio — Admin Styles */
+
+.sep-admin-wrap h1 {
+	font-family: 'JetBrains Mono', monospace;
+}
+
+.sep-meta-table th {
+	width: 200px;
+	padding: 12px 10px;
+	vertical-align: top;
+}
+
+.sep-meta-table td {
+	padding: 10px;
+}
+
+.sep-media-field img {
+	border: 1px solid #ddd;
+	border-radius: 4px;
+}
+
+.sep-upload-btn {
+	margin-top: 4px;
+}
