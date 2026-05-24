@@ -718,7 +718,8 @@ class SE_Portfolio_Public {
 	 * @return string
 	 */
 	public function login_header_text(): string {
-		return get_bloginfo( 'name' );
+		$hostname = strtolower( preg_replace( '/[^a-zA-Z0-9]/', '', get_bloginfo( 'name' ) ) ) ?: 'portfolio';
+		return 'visitor@' . $hostname . ': ~/login &#8212; bash';
 	}
 
 	/**
