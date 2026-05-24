@@ -497,6 +497,31 @@ body.admin-bar .sep-hero { padding-top: 192px; }
 	text-decoration: none;
 }
 
+/* Load More */
+.sep-load-more-wrap {
+	display:         flex;
+	justify-content: center;
+	margin-top:      2.5rem;
+}
+.sep-load-more {
+	padding:        8px 28px;
+	letter-spacing: 0.04em;
+}
+.sep-load-more::before {
+	content: '> ';
+	color:   var(--sep-accent);
+}
+.sep-load-more:hover {
+	box-shadow: 0 0 12px rgba( 0, 210, 106, 0.2 );
+}
+.sep-load-more:disabled {
+	opacity: 0.5;
+	cursor:  not-allowed;
+}
+.sep-load-more:disabled::before {
+	content: '$ ';
+}
+
 /* Availability badge */
 .sep-badge-available {
 	display:       inline-flex;

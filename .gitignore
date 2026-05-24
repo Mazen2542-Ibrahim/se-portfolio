@@ -1,0 +1,15 @@
+# Docker volumes
+uploads/
+
+# WordPress core (don't version control core files)
+# themes/* — uncomment if you only want your own themes tracked
+# !themes/my-custom-theme
+
+# Common OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp

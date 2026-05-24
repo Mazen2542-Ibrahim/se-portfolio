@@ -32,6 +32,9 @@ class SE_Portfolio_Public {
 		add_shortcode( 'sep_education',    [ $this, 'shortcode_education' ] );
 		add_shortcode( 'sep_certificates', [ $this, 'shortcode_certificates' ] );
 		add_shortcode( 'sep_portfolio',    [ $this, 'shortcode_portfolio' ] );
+
+		add_action( 'wp_ajax_sep_load_more',        [ $this, 'ajax_load_more' ] );
+		add_action( 'wp_ajax_nopriv_sep_load_more', [ $this, 'ajax_load_more' ] );
 	}
 
 	/**
@@ -178,6 +181,11 @@ class SE_Portfolio_Public {
 			SEP_VERSION,
 			true
 		);
+
+		wp_localize_script( 'sep-portfolio', 'sepAjax', [
+			'ajaxurl' => admin_url( 'admin-ajax.php' ),
+			'nonce'   => wp_create_nonce( 'sep_load_more' ),
+		] );
 	}
 
 	// -------------------------------------------------------------------------
@@ -200,7 +208,7 @@ class SE_Portfolio_Public {
 	public function shortcode_projects( array $atts ): string {
 		$atts = shortcode_atts(
 			[
-				'limit'    => 12,
+				'limit'    => 6,
 				'status'   => '',
 				'featured' => '',
 			],
@@ -211,12 +219,14 @@ class SE_Portfolio_Public {
 		$limit    = absint( $atts['limit'] );
 		$status   = sanitize_key( $atts['status'] );
 		$featured = sanitize_key( $atts['featured'] );
+		$per_page = $limit ?: 6;
 
 		$query_args = [
 			'post_type'      => 'sep_project',
 			'post_status'    => 'publish',
-			'posts_per_page' => $limit ?: 12,
-			'no_found_rows'  => true,
+			'posts_per_page' => $per_page,
+			'paged'          => 1,
+			'no_found_rows'  => false,
 		];
 
 		$meta_query = [];
@@ -231,6 +241,7 @@ class SE_Portfolio_Public {
 		}
 
 		$projects_query = new WP_Query( $query_args );
+		$max_pages      = (int) $projects_query->max_num_pages;
 
 		ob_start();
 		include SEP_PLUGIN_DIR . 'public/partials/projects.php';
@@ -322,18 +333,21 @@ class SE_Portfolio_Public {
 	 * @param  array<string, string> $atts
 	 */
 	public function shortcode_certificates( array $atts ): string {
-		$atts  = shortcode_atts( [ 'limit' => 20 ], $atts, 'sep_certificates' );
-		$limit = absint( $atts['limit'] );
+		$atts     = shortcode_atts( [ 'limit' => 6 ], $atts, 'sep_certificates' );
+		$limit    = absint( $atts['limit'] );
+		$per_page = $limit ?: 6;
 
 		$certs_query = new WP_Query( [
 			'post_type'      => 'sep_certificate',
 			'post_status'    => 'publish',
-			'posts_per_page' => $limit ?: 20,
-			'no_found_rows'  => true,
+			'posts_per_page' => $per_page,
+			'paged'          => 1,
+			'no_found_rows'  => false,
 			'meta_key'       => '_sep_order', // phpcs:ignore WordPress.DB.SlowDBQuery
 			'orderby'        => 'meta_value_num',
 			'order'          => 'ASC',
 		] );
+		$max_pages = (int) $certs_query->max_num_pages;
 
 		ob_start();
 		include SEP_PLUGIN_DIR . 'public/partials/certificates.php';
@@ -347,12 +361,15 @@ class SE_Portfolio_Public {
 	public function shortcode_portfolio( array $atts ): string {
 		$about = get_option( 'sep_about', [] );
 
-		$projects_query = new WP_Query( [
+		$projects_per_page = 6;
+		$projects_query    = new WP_Query( [
 			'post_type'      => 'sep_project',
 			'post_status'    => 'publish',
-			'posts_per_page' => -1,
-			'no_found_rows'  => true,
+			'posts_per_page' => $projects_per_page,
+			'paged'          => 1,
+			'no_found_rows'  => false,
 		] );
+		$projects_max_pages = (int) $projects_query->max_num_pages;
 
 		$skills_query = new WP_Query( [
 			'post_type'      => 'sep_skill',
@@ -384,19 +401,77 @@ class SE_Portfolio_Public {
 			'order'          => 'ASC',
 		] );
 
-		$certs_query = new WP_Query( [
+		$certs_per_page = 6;
+		$certs_query    = new WP_Query( [
 			'post_type'      => 'sep_certificate',
 			'post_status'    => 'publish',
-			'posts_per_page' => -1,
-			'no_found_rows'  => true,
+			'posts_per_page' => $certs_per_page,
+			'paged'          => 1,
+			'no_found_rows'  => false,
 			'meta_key'       => '_sep_order', // phpcs:ignore WordPress.DB.SlowDBQuery
 			'orderby'        => 'meta_value_num',
 			'order'          => 'ASC',
 		] );
+		$certs_max_pages = (int) $certs_query->max_num_pages;
 
 		ob_start();
 		include SEP_PLUGIN_DIR . 'public/partials/portfolio-full.php';
 		wp_reset_postdata();
 		return ob_get_clean();
+	}
+
+	/**
+	 * AJAX handler: loads the next page of project or certificate cards.
+	 *
+	 * @since 1.0.0
+	 */
+	public function ajax_load_more(): void {
+		check_ajax_referer( 'sep_load_more', 'nonce' );
+
+		$section  = sanitize_key( wp_unslash( $_POST['section'] ?? '' ) );
+		$page     = absint( $_POST['page'] ?? 1 );
+		$per_page = absint( $_POST['per_page'] ?? 6 );
+
+		if ( ! in_array( $section, [ 'projects', 'certificates' ], true ) || $page < 1 || $per_page < 1 ) {
+			wp_send_json_error( [ 'message' => 'Invalid parameters.' ], 400 );
+		}
+
+		if ( 'projects' === $section ) {
+			$query        = new WP_Query( [
+				'post_type'      => 'sep_project',
+				'post_status'    => 'publish',
+				'posts_per_page' => $per_page,
+				'paged'          => $page,
+				'no_found_rows'  => false,
+			] );
+			$card_partial = SEP_PLUGIN_DIR . 'public/partials/card-project.php';
+		} else {
+			$query        = new WP_Query( [
+				'post_type'      => 'sep_certificate',
+				'post_status'    => 'publish',
+				'posts_per_page' => $per_page,
+				'paged'          => $page,
+				'no_found_rows'  => false,
+				'meta_key'       => '_sep_order', // phpcs:ignore WordPress.DB.SlowDBQuery
+				'orderby'        => 'meta_value_num',
+				'order'          => 'ASC',
+			] );
+			$card_partial = SEP_PLUGIN_DIR . 'public/partials/card-certificate.php';
+		}
+
+		ob_start();
+		if ( $query->have_posts() ) {
+			while ( $query->have_posts() ) {
+				$query->the_post();
+				include $card_partial; // phpcs:ignore WPThemeReview.CoreFunctionality.FileInclude
+			}
+		}
+		$html = ob_get_clean();
+		wp_reset_postdata();
+
+		wp_send_json_success( [
+			'html'      => $html,
+			'max_pages' => (int) $query->max_num_pages,
+		] );
 	}
 }

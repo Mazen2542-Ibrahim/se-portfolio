@@ -9,6 +9,7 @@
 		initTopNav();
 		initStickyNav();
 		initProjectFilters();
+		initLoadMore();
 		initSmoothScroll();
 		initTypingAnimation();
 	} );
@@ -112,9 +113,18 @@
 	/* ------------------------------------------------------------------
 	 * Project Filter Tabs — No Page Reload
 	 * ------------------------------------------------------------------ */
+	function applyProjectFilter( filter ) {
+		document.querySelectorAll( '.sep-project-card' ).forEach( function ( card ) {
+			if ( 'all' === filter || card.dataset.status === filter ) {
+				card.style.display = '';
+			} else {
+				card.style.display = 'none';
+			}
+		} );
+	}
+
 	function initProjectFilters() {
-		var tabs  = document.querySelectorAll( '.sep-filter-tab' );
-		var cards = document.querySelectorAll( '.sep-project-card' );
+		var tabs = document.querySelectorAll( '.sep-filter-tab' );
 
 		if ( ! tabs.length ) {
 			return;
@@ -129,14 +139,65 @@
 					t.classList.toggle( 'is-active', t === tab );
 				} );
 
-				// Show / hide cards.
-				cards.forEach( function ( card ) {
-					if ( 'all' === filter || card.dataset.status === filter ) {
-						card.style.display = '';
-					} else {
-						card.style.display = 'none';
-					}
-				} );
+				applyProjectFilter( filter );
+			} );
+		} );
+	}
+
+	/* ------------------------------------------------------------------
+	 * Load More — AJAX Pagination for Projects & Certificates
+	 * ------------------------------------------------------------------ */
+	function initLoadMore() {
+		if ( typeof sepAjax === 'undefined' ) {
+			return;
+		}
+
+		document.querySelectorAll( '.sep-load-more' ).forEach( function ( btn ) {
+			btn.addEventListener( 'click', function () {
+				var section  = btn.dataset.section;
+				var grid     = document.querySelector( '.sep-cards-grid[data-section="' + section + '"]' );
+				var page     = parseInt( grid.dataset.page, 10 ) + 1;
+				var perPage  = parseInt( grid.dataset.perPage, 10 );
+				var maxPages = parseInt( grid.dataset.maxPages, 10 );
+
+				btn.disabled    = true;
+				btn.textContent = 'Loading…';
+
+				var data = new FormData();
+				data.append( 'action',   'sep_load_more' );
+				data.append( 'nonce',    sepAjax.nonce );
+				data.append( 'section',  section );
+				data.append( 'page',     page );
+				data.append( 'per_page', perPage );
+
+				fetch( sepAjax.ajaxurl, { method: 'POST', body: data } )
+					.then( function ( r ) { return r.json(); } )
+					.then( function ( res ) {
+						if ( res.success && res.data.html ) {
+							grid.insertAdjacentHTML( 'beforeend', res.data.html );
+							grid.dataset.page = page;
+
+							// Re-apply active filter to newly loaded project cards.
+							if ( 'projects' === section ) {
+								var active = document.querySelector( '.sep-filter-tab.is-active' );
+								if ( active && 'all' !== active.dataset.filter ) {
+									applyProjectFilter( active.dataset.filter );
+								}
+							}
+						}
+
+						if ( page >= maxPages ) {
+							btn.closest( '.sep-load-more-wrap' ).remove();
+						} else {
+							btn.disabled    = false;
+							btn.textContent = 'Load More';
+						}
+					} )
+					.catch( function ( err ) {
+						console.error( '[SEP] Load more failed:', err );
+						btn.disabled    = false;
+						btn.textContent = 'Load More';
+					} );
 			} );
 		} );
 	}

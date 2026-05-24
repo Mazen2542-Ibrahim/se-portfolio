@@ -4,12 +4,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 /*
  * Variables passed from SE_Portfolio_Public::shortcode_portfolio():
- *   $about            — array from get_option( 'sep_about' )
- *   $projects_query   — WP_Query
- *   $skills_query     — WP_Query
- *   $experience_query — WP_Query
- *   $education_query  — WP_Query
- *   $certs_query      — WP_Query
+ *   $about               — array from get_option( 'sep_about' )
+ *   $projects_query      — WP_Query (page 1)
+ *   $projects_per_page   — int
+ *   $projects_max_pages  — int
+ *   $skills_query        — WP_Query
+ *   $experience_query    — WP_Query
+ *   $education_query     — WP_Query
+ *   $certs_query         — WP_Query (page 1)
+ *   $certs_per_page      — int
+ *   $certs_max_pages     — int
  */
 
 $photo_id  = isset( $about['photo_id'] ) ? (int) $about['photo_id'] : 0;
@@ -148,10 +152,6 @@ $section_ids  = array_merge(
 				<?php endif; ?>
 			</div>
 		</div><!-- /.sep-hero-inner -->
-			<div class="sep-term-prompt-line">
-				<span class="sep-term-ps1">visitor@portfolio:~$</span>
-				<span class="sep-term-cmd"> cat links.txt</span>
-			</div>
 		</div><!-- /.sep-term-body -->
 	</header>
 
@@ -210,6 +210,10 @@ $section_ids  = array_merge(
 						<?php endif; ?>
 					</div>
 
+					<div class="sep-term-prompt-line">
+						<span class="sep-term-ps1">visitor@portfolio:~$</span>
+						<span class="sep-term-cmd"> cat links.txt</span>
+					</div>
 					<div class="sep-about-links">
 						<?php if ( ! empty( $about['github_url'] ) ) : ?>
 							<a class="sep-btn sep-btn-outline" href="<?php echo esc_url( $about['github_url'] ); ?>" target="_blank" rel="noopener noreferrer"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="15" height="15" aria-hidden="true"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg> GitHub</a>
@@ -341,55 +345,24 @@ $section_ids  = array_merge(
 					<button class="sep-filter-tab" data-filter="archived"><?php esc_html_e( 'Archived', 'se-portfolio' ); ?></button>
 				</div>
 
-				<div class="sep-cards-grid">
+				<div class="sep-cards-grid"
+					data-section="projects"
+					data-page="1"
+					data-per-page="<?php echo esc_attr( $projects_per_page ); ?>"
+					data-max-pages="<?php echo esc_attr( $projects_max_pages ); ?>">
 					<?php while ( $projects_query->have_posts() ) : $projects_query->the_post(); ?>
-						<?php
-						$pid      = get_the_ID();
-						$p_status = get_post_meta( $pid, '_sep_status', true ) ?: 'in-progress';
-						$p_url    = get_post_meta( $pid, '_sep_project_url', true );
-						$p_github = get_post_meta( $pid, '_sep_github_url', true );
-						$p_tech   = get_post_meta( $pid, '_sep_technologies', true );
-						$p_thumb  = get_the_post_thumbnail_url( $pid, 'medium' );
-						?>
-						<article class="sep-card sep-project-card" data-status="<?php echo esc_attr( $p_status ); ?>">
-							<div class="sep-card-chrome" aria-hidden="true">
-								<span class="sep-card-dot"></span>
-								<span class="sep-card-dot"></span>
-								<span class="sep-card-dot"></span>
-								<span class="sep-card-filename"><?php echo esc_html( strtolower( str_replace( ' ', '_', get_the_title() ) ) . '.sh' ); ?></span>
-							</div>
-							<?php if ( $p_thumb ) : ?>
-								<img class="sep-card-thumbnail" src="<?php echo esc_url( $p_thumb ); ?>" alt="<?php the_title_attribute(); ?>" loading="lazy">
-							<?php endif; ?>
-						<div class="sep-card-body">
-							<div class="sep-card-header">
-								<h3 class="sep-card-title"><?php the_title(); ?></h3>
-								<span class="sep-status sep-status-<?php echo esc_attr( $p_status ); ?>">
-									<?php echo esc_html( ucfirst( str_replace( '-', ' ', $p_status ) ) ); ?>
-								</span>
-							</div>
-							<p class="sep-card-desc">
-								<?php echo esc_html( get_post_meta( $pid, '_sep_short_desc', true ) ?: get_the_excerpt() ); ?>
-							</p>
-							<?php if ( $p_tech ) : ?>
-								<div class="sep-tags">
-									<?php foreach ( array_filter( array_map( 'trim', explode( ',', $p_tech ) ) ) as $t ) : ?>
-										<span class="sep-tag"><?php echo esc_html( $t ); ?></span>
-									<?php endforeach; ?>
-								</div>
-							<?php endif; ?>
-							<div class="sep-card-actions">
-								<?php if ( $p_url ) : ?>
-									<a class="sep-card-link" href="<?php echo esc_url( $p_url ); ?>" target="_blank" rel="noopener noreferrer"><?php esc_html_e( 'Live Demo', 'se-portfolio' ); ?></a>
-								<?php endif; ?>
-								<?php if ( $p_github ) : ?>
-									<a class="sep-card-link" href="<?php echo esc_url( $p_github ); ?>" target="_blank" rel="noopener noreferrer">GitHub</a>
-								<?php endif; ?>
-							</div>
-						</div>
-						</article>
+						<?php include __DIR__ . '/card-project.php'; ?>
 					<?php endwhile; ?>
 				</div>
+
+				<?php if ( $projects_max_pages > 1 ) : ?>
+					<div class="sep-load-more-wrap">
+						<button class="sep-btn sep-btn-outline sep-load-more" data-section="projects">
+							<?php esc_html_e( 'Load More', 'se-portfolio' ); ?>
+						</button>
+					</div>
+				<?php endif; ?>
+
 			<?php else : ?>
 				<p class="sep-empty"><?php esc_html_e( 'No projects found.', 'se-portfolio' ); ?></p>
 			<?php endif; ?>
@@ -463,66 +436,24 @@ $section_ids  = array_merge(
 			<h2 class="sep-section-heading"><?php esc_html_e( 'Certificates', 'se-portfolio' ); ?></h2>
 
 			<?php if ( $certs_query->have_posts() ) : ?>
-				<div class="sep-cards-grid">
+				<div class="sep-cards-grid"
+					data-section="certificates"
+					data-page="1"
+					data-per-page="<?php echo esc_attr( $certs_per_page ); ?>"
+					data-max-pages="<?php echo esc_attr( $certs_max_pages ); ?>">
 					<?php while ( $certs_query->have_posts() ) : $certs_query->the_post(); ?>
-						<?php
-						$cid       = get_the_ID();
-						$issuer    = get_post_meta( $cid, '_sep_issuer', true );
-						$issue_dt  = get_post_meta( $cid, '_sep_issue_date', true );
-						$expiry_dt = get_post_meta( $cid, '_sep_expiry_date', true );
-						$no_expiry = (bool) get_post_meta( $cid, '_sep_no_expiry', true );
-						$cred_id   = get_post_meta( $cid, '_sep_credential_id', true );
-						$cred_url  = get_post_meta( $cid, '_sep_credential_url', true );
-						$ci_id     = (int) get_post_meta( $cid, '_sep_cert_image', true );
-						$ci_url    = $ci_id ? wp_get_attachment_image_url( $ci_id, 'medium' ) : get_the_post_thumbnail_url( $cid, 'medium' );
-						$c_skills  = get_post_meta( $cid, '_sep_skills_covered', true );
-						?>
-						<article class="sep-card">
-							<div class="sep-card-chrome" aria-hidden="true">
-								<span class="sep-card-dot"></span>
-								<span class="sep-card-dot"></span>
-								<span class="sep-card-dot"></span>
-								<span class="sep-card-filename"><?php echo esc_html( strtolower( str_replace( ' ', '_', get_the_title() ) ) . '.cert' ); ?></span>
-							</div>
-							<div class="sep-card-body">
-							<?php if ( $ci_url ) : ?>
-								<img class="sep-cert-image" src="<?php echo esc_url( $ci_url ); ?>" alt="<?php the_title_attribute(); ?>" loading="lazy">
-							<?php endif; ?>
-							<h3 class="sep-card-title"><?php the_title(); ?></h3>
-							<p class="sep-card-meta">
-								<?php echo esc_html( $issuer ); ?>
-								<?php if ( $issue_dt ) : ?>
-									&nbsp;&bull;&nbsp; <?php echo esc_html( date_i18n( 'M Y', strtotime( $issue_dt ) ) ); ?>
-								<?php endif; ?>
-							</p>
-							<?php if ( $no_expiry ) : ?>
-								<span class="sep-status sep-status-completed"><?php esc_html_e( 'No Expiry', 'se-portfolio' ); ?></span>
-							<?php elseif ( $expiry_dt ) : ?>
-								<p class="sep-card-meta" style="color:var(--sep-warning);">
-									<?php printf( esc_html__( 'Expires: %s', 'se-portfolio' ), esc_html( date_i18n( 'M Y', strtotime( $expiry_dt ) ) ) ); ?>
-								</p>
-							<?php endif; ?>
-							<?php if ( $cred_id ) : ?>
-								<p class="sep-card-meta"><?php printf( esc_html__( 'ID: %s', 'se-portfolio' ), esc_html( $cred_id ) ); ?></p>
-							<?php endif; ?>
-							<?php if ( $c_skills ) : ?>
-								<div class="sep-tags">
-									<?php foreach ( array_filter( array_map( 'trim', explode( ',', $c_skills ) ) ) as $t ) : ?>
-										<span class="sep-tag"><?php echo esc_html( $t ); ?></span>
-									<?php endforeach; ?>
-								</div>
-							<?php endif; ?>
-							<?php if ( $cred_url ) : ?>
-								<div class="sep-card-actions">
-									<a class="sep-card-link" href="<?php echo esc_url( $cred_url ); ?>" target="_blank" rel="noopener noreferrer">
-										<?php esc_html_e( 'Verify Credential', 'se-portfolio' ); ?>
-									</a>
-								</div>
-							<?php endif; ?>
-							</div><!-- /.sep-card-body -->
-						</article>
+						<?php include __DIR__ . '/card-certificate.php'; ?>
 					<?php endwhile; ?>
 				</div>
+
+				<?php if ( $certs_max_pages > 1 ) : ?>
+					<div class="sep-load-more-wrap">
+						<button class="sep-btn sep-btn-outline sep-load-more" data-section="certificates">
+							<?php esc_html_e( 'Load More', 'se-portfolio' ); ?>
+						</button>
+					</div>
+				<?php endif; ?>
+
 			<?php else : ?>
 				<p class="sep-empty"><?php esc_html_e( 'No certificates found.', 'se-portfolio' ); ?></p>
 			<?php endif; ?>
