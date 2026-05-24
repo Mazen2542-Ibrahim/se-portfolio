@@ -21,6 +21,12 @@ class SE_Portfolio_Activator {
 			add_option( 'sep_about', self::default_about() );
 		}
 
+		// Seed the Style Settings option with GitHub Dark defaults.
+		if ( false === get_option( 'sep_style' ) ) {
+			require_once SEP_PLUGIN_DIR . 'admin/class-style-settings.php';
+			add_option( 'sep_style', SE_Portfolio_Style_Settings::get_defaults() );
+		}
+
 		add_option( 'sep_version', SEP_VERSION );
 
 		flush_rewrite_rules();

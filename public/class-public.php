@@ -154,6 +154,145 @@ class SE_Portfolio_Public {
 		<?php
 	}
 
+	/**
+	 * Outputs a <style> block that overrides the portfolio CSS custom properties
+	 * with any values saved in the sep_style option. Runs after inject_page_overrides
+	 * so variable overrides take precedence over the stylesheet defaults.
+	 *
+	 * All values are pre-validated at save time; font strings have CSS injection
+	 * characters stripped before output.
+	 *
+	 * @since 1.1.0
+	 */
+	public function inject_custom_styles(): void {
+		if ( ! $this->has_shortcode ) {
+			return;
+		}
+
+		$style    = get_option( 'sep_style', [] );
+		$defaults = SE_Portfolio_Style_Settings::get_defaults();
+
+		$color_vars = [
+			'bg'       => '--sep-bg',
+			'surface'  => '--sep-surface',
+			'surface2' => '--sep-surface2',
+			'border'   => '--sep-border',
+			'accent'   => '--sep-accent',
+			'green'    => '--sep-green',
+			'text'     => '--sep-text',
+			'muted'    => '--sep-muted',
+			'prompt'   => '--sep-prompt',
+			'warning'  => '--sep-warning',
+		];
+
+		$lines = [];
+		foreach ( $color_vars as $key => $var ) {
+			$value    = isset( $style[ $key ] ) && '' !== $style[ $key ] ? $style[ $key ] : $defaults[ $key ];
+			$lines[] = $var . ':' . $value;
+		}
+
+		// Radius — pre-validated: digits + alphanumeric only.
+		$radius  = isset( $style['radius'] ) && '' !== $style['radius'] ? $style['radius'] : $defaults['radius'];
+		$lines[] = '--sep-radius:' . $radius;
+
+		// Font families — strip CSS injection chars that cannot appear in valid font names.
+		$font_mono = preg_replace( '/[{}<>]/', '', $style['font_mono'] ?? $defaults['font_mono'] );
+		$font_body = preg_replace( '/[{}<>]/', '', $style['font_body'] ?? $defaults['font_body'] );
+		$lines[]   = '--sep-font-mono:' . $font_mono;
+		$lines[]   = '--sep-font-body:' . $font_body;
+
+		// Design / spacing / sizing CSS variables.
+		// Values are pre-validated (alphanumeric + CSS-safe chars only) via sanitize_style().
+		$design_vars = [
+			'base_size'      => '--sep-base-size',
+			'section_py'     => '--sep-section-py',
+			'card_pad'       => '--sep-card-pad',
+			'hero_pt'        => '--sep-hero-pt',
+			'container_max'  => '--sep-container-max',
+			'hero_name_size' => '--sep-hero-name-size',
+			'transition'     => '--sep-transition',
+		];
+		foreach ( $design_vars as $key => $var ) {
+			$value   = isset( $style[ $key ] ) && '' !== $style[ $key ] ? $style[ $key ] : $defaults[ $key ];
+			$lines[] = $var . ':' . preg_replace( '/[{}<>]/', '', $value );
+		}
+
+		$css = ':root{' . implode( ';', $lines ) . '}';
+
+		// Per-component overrides — scoped to each section's data attribute or class.
+		$component_selectors = [
+			'hero'         => '[data-sep-section="hero"]',
+			'about'        => '[data-sep-section="about"]',
+			'skills'       => '[data-sep-section="skills"]',
+			'projects'     => '[data-sep-section="projects"]',
+			'experience'   => '[data-sep-section="experience"]',
+			'education'    => '[data-sep-section="education"]',
+			'certificates' => '[data-sep-section="certificates"]',
+			'contact'      => '[data-sep-section="contact"]',
+			'footer'       => '.sep-footer',
+		];
+		$component_var_map = [
+			'bg'      => '--sep-bg',
+			'surface' => '--sep-surface',
+			'accent'  => '--sep-accent',
+			'border'  => '--sep-border',
+			'text'    => '--sep-text',
+			'muted'   => '--sep-muted',
+		];
+
+		$components = isset( $style['components'] ) && is_array( $style['components'] ) ? $style['components'] : [];
+		foreach ( $components as $component => $overrides ) {
+			if ( ! isset( $component_selectors[ $component ] ) || ! is_array( $overrides ) ) {
+				continue;
+			}
+			$block = [];
+			foreach ( $overrides as $key => $value ) {
+				if ( '' !== $value && isset( $component_var_map[ $key ] ) ) {
+					$block[] = $component_var_map[ $key ] . ':' . $value;
+				}
+			}
+			if ( ! empty( $block ) ) {
+				$css .= $component_selectors[ $component ] . '{' . implode( ';', $block ) . '}';
+			}
+		}
+
+		// ---- Effect toggles — inject canned override blocks ----
+
+		if ( ! ( $style['show_glows'] ?? $defaults['show_glows'] ) ) {
+			$css .= '.sep-card:hover,.sep-contact-card:hover{box-shadow:none!important}'
+				. '.sep-btn-primary,.sep-btn-primary:hover,.sep-topnav-cta,.sep-topnav-cta:hover,.sep-load-more:hover{box-shadow:none!important}'
+				. '.sep-section-heading::before{text-shadow:none!important}'
+				. '.sep-stat-number{text-shadow:none!important}'
+				. '.sep-timeline-item-dot,.sep-badge-dot,.sep-nav-dot{box-shadow:none!important}';
+		}
+
+		if ( ! ( $style['show_scanlines'] ?? $defaults['show_scanlines'] ) ) {
+			$css .= '.sep-hero::after{display:none!important}';
+		}
+
+		if ( ! ( $style['show_animations'] ?? $defaults['show_animations'] ) ) {
+			$css .= '.sep-portfolio *{animation:none!important}';
+		}
+
+		if ( ! ( $style['show_blink'] ?? $defaults['show_blink'] ) ) {
+			$css .= '.sep-blink::after{animation:none!important;opacity:1}';
+		}
+
+		$card_style = $style['card_style'] ?? $defaults['card_style'];
+		if ( 'flat' === $card_style ) {
+			$css .= '.sep-card-chrome{display:none!important}'
+				. '.sep-card-body{border-radius:var(--sep-radius);border-top:1px solid var(--sep-border)}';
+		}
+
+		// Custom CSS — already stripped of HTML tags at save time.
+		$custom_css = trim( $style['custom_css'] ?? '' );
+		if ( '' !== $custom_css ) {
+			$css .= $custom_css;
+		}
+
+		echo '<style id="sep-custom-styles">' . "\n" . $css . "\n" . '</style>' . "\n";
+	}
+
 	public function enqueue_assets(): void {
 		if ( ! $this->has_shortcode ) {
 			return;

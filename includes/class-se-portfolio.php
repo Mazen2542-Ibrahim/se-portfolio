@@ -45,6 +45,7 @@ class SE_Portfolio {
 		require_once SEP_PLUGIN_DIR . 'includes/class-meta-boxes.php';
 		require_once SEP_PLUGIN_DIR . 'includes/class-rest-api.php';
 		require_once SEP_PLUGIN_DIR . 'admin/class-admin.php';
+		require_once SEP_PLUGIN_DIR . 'admin/class-style-settings.php';
 		require_once SEP_PLUGIN_DIR . 'public/class-public.php';
 	}
 
@@ -90,6 +91,12 @@ class SE_Portfolio {
 		add_action( 'admin_init',             [ $admin, 'register_settings' ] );
 		add_action( 'admin_enqueue_scripts',  [ $admin, 'enqueue_assets' ] );
 		add_action( 'admin_head',             [ $admin, 'inject_favicon' ], 1 );
+
+		$style_settings = new SE_Portfolio_Style_Settings();
+		add_action( 'admin_menu',             [ $style_settings, 'register_menu' ] );
+		add_action( 'admin_init',             [ $style_settings, 'register_settings' ] );
+		add_action( 'admin_enqueue_scripts',  [ $style_settings, 'enqueue_assets' ] );
+		add_action( 'wp_ajax_sep_reset_style', [ $style_settings, 'ajax_reset_defaults' ] );
 	}
 
 	private function define_public_hooks(): void {
@@ -98,6 +105,7 @@ class SE_Portfolio {
 		add_action( 'wp_enqueue_scripts', [ $public, 'enqueue_assets' ] );
 		add_filter( 'the_posts',         [ $public, 'detect_shortcodes' ] );
 		add_action( 'wp_head',           [ $public, 'inject_page_overrides' ] );
+		add_action( 'wp_head',           [ $public, 'inject_custom_styles' ], 15 );
 		add_action( 'wp_head',           [ $public, 'inject_favicon' ], 1 );
 	}
 

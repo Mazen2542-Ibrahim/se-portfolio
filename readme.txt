@@ -3,7 +3,7 @@ Contributors: mazen
 Tags: portfolio, developer, support engineer, dark theme, shortcode
 Requires at least: 6.4
 Tested up to: 6.7
-Stable tag: 1.0.0
+Stable tag: 1.1.0
 Requires PHP: 8.1
 License: GPL v2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -26,6 +26,14 @@ SE Portfolio lets you build a complete, one-page developer portfolio inside Word
 * Terminal blinking cursor on the hero job title
 * Full WCAG accessibility attributes on progress bars
 * GitHub-dark color scheme with CSS custom properties
+* **Style Settings** admin page — change colors, fonts, spacing, and effects without writing code
+* 6 built-in color presets: GitHub Dark, Ocean Blue, Dracula, Nord, Purple Haze, Solarized Dark
+* Per-section color overrides for every portfolio section
+* Typography controls: font family, base size, hero name size
+* Spacing controls: section padding, card padding, hero top padding, container max-width
+* Visual effect toggles: glow effects, scanlines, animations, cursor blink
+* Card style toggle: terminal (with chrome header bar) or flat
+* Custom CSS textarea with a built-in reference panel (variables, selectors, examples)
 
 **Shortcodes:**
 
@@ -49,13 +57,13 @@ SE Portfolio lets you build a complete, one-page developer portfolio inside Word
 
 = How do I change the color scheme? =
 
-Override the CSS custom properties in your theme's CSS:
-```css
-:root {
-    --sep-accent: #your-color;
-    --sep-green: #your-color;
-}
-```
+Go to **SE Portfolio › Style Settings** and pick one of the 6 built-in presets, or use the color pickers to set any palette you like. Changes take effect on save — no CSS needed.
+
+For advanced overrides, use the **Custom CSS** field at the bottom of the same page. A built-in reference panel lists every available `--sep-*` variable with its current value, all section selectors, and copy-paste example snippets.
+
+= Can I override styles for just one section? =
+
+Yes. Under **SE Portfolio › Style Settings › Component Overrides** you can set independent colors (background, surface, accent, border, text, muted) for each section (Hero, About, Skills, etc.) without affecting the rest of the page.
 
 = Can I use individual shortcodes separately? =
 
@@ -66,6 +74,17 @@ Yes. Each section has its own shortcode. See the Shortcodes section above.
 Yes. All endpoints under `sep/v1` are read-only and public — they return portfolio data only.
 
 == Changelog ==
+
+= 1.1.0 =
+* Added Style Settings admin page with full color, font, spacing, and effect controls.
+* Added 6 built-in color presets (GitHub Dark, Ocean Blue, Dracula, Nord, Purple Haze, Solarized Dark).
+* Added per-section component color overrides for all 9 portfolio sections.
+* Added typography size controls (base size, hero name size).
+* Added spacing controls (section padding, card padding, hero padding, container max-width).
+* Added visual effect toggles: glow effects, scanlines, animations, cursor blink.
+* Added card style toggle: terminal or flat.
+* Added Custom CSS textarea with inline reference panel (CSS variables, selectors, snippets).
+* Updated portfolio.css layout values to use CSS custom properties.
 
 = 1.0.0 =
 * Initial release.

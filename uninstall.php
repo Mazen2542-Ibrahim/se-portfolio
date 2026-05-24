@@ -5,6 +5,7 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 
 // Remove plugin options.
 delete_option( 'sep_about' );
+delete_option( 'sep_style' );
 delete_option( 'sep_version' );
 
 // Delete all posts for each CPT (true = force delete, bypasses trash).

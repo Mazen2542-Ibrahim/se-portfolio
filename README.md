@@ -2,7 +2,7 @@
 
 A production-ready, one-page developer portfolio plugin for WordPress with a terminal / GitHub dark aesthetic.
 
-**Version:** 1.0.0 | **Requires WordPress:** 6.4+ | **Requires PHP:** 8.1+
+**Version:** 1.1.0 | **Requires WordPress:** 6.4+ | **Requires PHP:** 8.1+
 
 ---
 
@@ -17,11 +17,12 @@ A production-ready, one-page developer portfolio plugin for WordPress with a ter
    - [Experience](#experience)
    - [Education](#education)
    - [Certificates](#certificates)
+   - [Style Settings](#style-settings)
 4. [Shortcodes](#shortcodes)
 5. [Customizing the Style](#customizing-the-style)
+   - [Style Settings (GUI)](#style-settings-gui)
    - [CSS Custom Properties](#css-custom-properties)
-   - [Adding Your Own CSS](#adding-your-own-css)
-   - [Changing the Color Scheme](#changing-the-color-scheme)
+   - [Custom CSS Field](#custom-css-field)
    - [Typography](#typography)
 6. [REST API](#rest-api)
 7. [Uninstallation](#uninstallation)
@@ -224,6 +225,88 @@ That single shortcode renders the entire one-page portfolio including navigation
 
 ---
 
+### Style Settings
+
+**SE Portfolio → Style Settings** controls the entire visual design of the portfolio — no CSS knowledge required.
+
+#### Global Colors
+
+10 color pickers for the full palette:
+
+| Field | CSS Variable | Description |
+|---|---|---|
+| Background | `--sep-bg` | Page background |
+| Surface | `--sep-surface` | Alternate section background |
+| Surface 2 | `--sep-surface2` | Card and stat background |
+| Border | `--sep-border` | All borders and dividers |
+| Accent | `--sep-accent` | Buttons, active links, section headings |
+| Green | `--sep-green` | Skill chip and badge colour |
+| Text | `--sep-text` | Primary body text |
+| Muted | `--sep-muted` | Secondary / helper text |
+| Prompt | `--sep-prompt` | Terminal prompt `$` colour |
+| Warning | `--sep-warning` | "In Progress" status badge |
+
+Use the **Preset** dropdown at the top of the page to apply a full palette in one click:
+
+| Preset | Character |
+|---|---|
+| GitHub Dark | Deep navy, green accent — the default |
+| Ocean Blue | Dark navy, blue accent |
+| Dracula | Dark purple, lavender accent |
+| Nord | Arctic blue-grey, cyan accent |
+| Purple Haze | Deep purple, violet accent |
+| Solarized Dark | Classic solarized palette |
+
+#### Typography
+
+| Field | CSS Variable | Default |
+|---|---|---|
+| Monospace font | `--sep-font-mono` | JetBrains Mono, Fira Code, Cascadia Code |
+| Body font | `--sep-font-body` | JetBrains Mono, Fira Code, Cascadia Code |
+| Base font size | `--sep-base-size` | `15px` |
+| Hero name size | `--sep-hero-name-size` | `clamp(1.6rem, 4vw, 2.4rem)` |
+
+#### Spacing & Layout
+
+| Field | CSS Variable | Default |
+|---|---|---|
+| Section vertical padding | `--sep-section-py` | `80px` |
+| Card padding | `--sep-card-pad` | `16px` |
+| Hero top padding | `--sep-hero-pt` | `160px` |
+| Container max-width | `--sep-container-max` | `1100px` |
+| Border radius | `--sep-radius` | `3px` |
+| Transition speed | `--sep-transition` | `0.15s` |
+
+#### Effects & Card Style
+
+| Toggle | What it controls |
+|---|---|
+| Glow Effects | Box-shadow glows on card hover |
+| Scanlines | CRT scanline overlay on the hero section |
+| Animations | All CSS keyframe animations (skill bar fill, fade-ins) |
+| Cursor Blink | The terminal blinking cursor on the hero job title |
+
+**Card Style:**
+- **Terminal** — card has a chrome header bar (macOS-style traffic-light dots) above the content.
+- **Flat** — clean card with no chrome bar; a simple top border instead.
+
+#### Component Overrides
+
+Each of the 9 portfolio sections (Hero, About, Skills, Projects, Experience, Education, Certificates, Contact, Footer) has 6 optional color pickers: Background, Surface, Accent, Border, Text, Muted. Leave a field empty to inherit the global value. Sections with at least one override are expanded automatically.
+
+#### Custom CSS
+
+A freeform CSS textarea injected after all plugin styles — your rules always win. A built-in **CSS Reference** collapsible panel (no JS required) lists:
+- Every `--sep-*` variable with its current live value
+- CSS selectors for each portfolio section
+- 5 copy-paste example snippets
+
+#### Reset to Defaults
+
+The **Reset to Defaults** button at the bottom of the page restores all settings to the GitHub Dark preset values. A confirmation dialog prevents accidental resets.
+
+---
+
 ## Shortcodes
 
 ### `[sep_portfolio]` — Full one-page portfolio
@@ -301,127 +384,96 @@ Renders the certificates card grid.
 
 ## Customizing the Style
 
+### Style Settings (GUI)
+
+The easiest way to customize the portfolio is **SE Portfolio → Style Settings** — a full admin page with color pickers, preset themes, typography controls, spacing fields, effect toggles, and a freeform Custom CSS textarea. See [Style Settings](#style-settings) in the Admin Configuration section above for the complete field reference.
+
+---
+
 ### CSS Custom Properties
 
-All colours, fonts, and radii are defined as CSS custom properties on `:root` inside `public/css/portfolio.css`. Override any of them in your child theme's stylesheet or via **Appearance → Customize → Additional CSS**.
+All visual values are driven by CSS custom properties. The Style Settings page writes these to the page automatically, but you can override them manually too — useful for programmatic theming or child-theme integration.
 
-```css
-/* Example: paste in Appearance → Customize → Additional CSS */
-:root {
-    --sep-bg:      #0d1117;   /* Page background */
-    --sep-surface: #161b22;   /* Card / section surface */
-    --sep-accent:  #58a6ff;   /* Primary accent (currently green — change to blue) */
-    --sep-prompt:  #79c0ff;   /* Terminal prompt colour */
-    --sep-text:    #e6edf3;   /* Body text */
-    --sep-muted:   #8b949e;   /* Muted / secondary text */
-    --sep-border:  #30363d;   /* Borders and dividers */
-    --sep-warning: #f0b429;   /* Warning / in-progress colour */
-    --sep-radius:  4px;       /* Border radius for cards and buttons */
-}
-```
+The full set of variables injected by the plugin:
 
 | Variable | Default | Controls |
 |---|---|---|
-| `--sep-bg` | `#0a0c10` | Page background colour |
-| `--sep-surface` | `#0f1318` | Section alternate background |
+| `--sep-bg` | `#0a0c10` | Page background |
+| `--sep-surface` | `#0f1318` | Alternate section background |
 | `--sep-surface2` | `#141c24` | Card and stat background |
 | `--sep-border` | `#1d2535` | All borders and dividers |
 | `--sep-accent` | `#00d26a` | Buttons, active links, section headings, timeline dots |
-| `--sep-green` | `#00d26a` | Same as accent (alias) |
+| `--sep-green` | `#00d26a` | Skill chip and badge colour (alias of accent) |
 | `--sep-prompt` | `#79c0ff` | Terminal prompt `$` colour, blue skill chips |
 | `--sep-text` | `#cdd9e5` | Primary body text |
 | `--sep-muted` | `#5c6773` | Secondary / helper text |
 | `--sep-warning` | `#f0b429` | "In Progress" status badge |
 | `--sep-radius` | `3px` | Border radius on all rounded elements |
 | `--sep-font-mono` | JetBrains Mono | Monospace font stack |
-| `--sep-font-body` | JetBrains Mono | Body font (same as mono for the terminal aesthetic) |
+| `--sep-font-body` | JetBrains Mono | Body font |
+| `--sep-base-size` | `15px` | Base font size for the portfolio |
+| `--sep-hero-name-size` | `clamp(1.6rem, 4vw, 2.4rem)` | Hero name responsive size |
+| `--sep-section-py` | `80px` | Section top/bottom padding |
+| `--sep-card-pad` | `16px` | Card body padding |
+| `--sep-hero-pt` | `160px` | Hero section top padding |
+| `--sep-container-max` | `1100px` | Max content width |
+| `--sep-transition` | `0.15s` | CSS transition duration |
+
+To hard-code a value and bypass the admin settings, scope the variable to the portfolio wrapper:
+
+```css
+/* Force a specific accent regardless of the saved preset */
+.sep-portfolio { --sep-accent: #58a6ff; }
+```
 
 ---
 
-### Adding Your Own CSS
+### Custom CSS Field
 
-The safest way to add styles without editing plugin files is **Appearance → Customize → Additional CSS**. All plugin selectors are prefixed with `.sep-portfolio` so your rules need to be specific enough to override them.
+The cleanest way to add one-off CSS rules is the **Custom CSS** field at the bottom of **SE Portfolio → Style Settings**. Rules entered there are injected after all plugin styles, so they always take priority.
 
-```css
-/* Make section headings blue instead of default green */
-.sep-section-heading::before {
-    color: #58a6ff;
-}
+Click **CSS Reference** (collapsible, no page reload) directly above the textarea to see every available variable with its current value, all section selectors, and ready-to-copy examples.
 
-/* Increase the hero name font size */
-.sep-hero-name {
-    font-size: clamp(2rem, 5vw, 3rem);
-}
+Common selectors:
 
-/* Round card corners more */
-.sep-portfolio {
-    --sep-radius: 8px;
-}
-```
+| Target | Selector |
+|---|---|
+| Whole portfolio | `.sep-portfolio` |
+| Hero section | `[data-sep-section="hero"]` |
+| About section | `[data-sep-section="about"]` |
+| Skills section | `[data-sep-section="skills"]` |
+| Projects section | `[data-sep-section="projects"]` |
+| Experience section | `[data-sep-section="experience"]` |
+| Education section | `[data-sep-section="education"]` |
+| Certificates section | `[data-sep-section="certificates"]` |
+| Contact section | `[data-sep-section="contact"]` |
+| Footer | `.sep-footer` |
+| Any card | `.sep-portfolio .sep-card` |
+| Top navigation | `.sep-portfolio .sep-topnav` |
 
-If you prefer to edit the plugin file directly, all front-end styles are in:
-
-```
-plugins/se-portfolio/public/css/portfolio.css
-```
-
-The file is organized into labelled sections with comments (e.g. `/* TOP NAVIGATION */`, `/* HERO */`, `/* SKILLS */`) so you can jump to the section you want to change.
-
----
-
-### Changing the Color Scheme
-
-#### Classic GitHub Dark (blue accent)
+Example snippets:
 
 ```css
-:root {
-    --sep-bg:      #0d1117;
-    --sep-surface: #161b22;
-    --sep-surface2: #21262d;
-    --sep-border:  #30363d;
-    --sep-accent:  #58a6ff;
-    --sep-green:   #3fb950;
-    --sep-prompt:  #79c0ff;
-    --sep-text:    #e6edf3;
-    --sep-muted:   #8b949e;
+/* Change the hero section background independently */
+[data-sep-section="hero"] { --sep-bg: #0d1b2a; }
+
+/* Make the hero name larger */
+.sep-portfolio .sep-hero-name { font-size: 3rem; }
+
+/* Add a stronger glow on card hover */
+.sep-portfolio .sep-card:hover {
+    box-shadow: 0 0 24px rgba(0, 210, 106, 0.35);
 }
-```
 
-#### Dracula (purple accent)
-
-```css
-:root {
-    --sep-bg:      #282a36;
-    --sep-surface: #1e1f29;
-    --sep-surface2: #313341;
-    --sep-border:  #44475a;
-    --sep-accent:  #bd93f9;
-    --sep-prompt:  #8be9fd;
-    --sep-text:    #f8f8f2;
-    --sep-muted:   #6272a4;
-}
-```
-
-#### Solarized Dark
-
-```css
-:root {
-    --sep-bg:      #002b36;
-    --sep-surface: #073642;
-    --sep-surface2: #094555;
-    --sep-border:  #0d5260;
-    --sep-accent:  #859900;
-    --sep-prompt:  #268bd2;
-    --sep-text:    #839496;
-    --sep-muted:   #586e75;
-}
+/* Hide the availability badge */
+.sep-portfolio .sep-badge-available { display: none; }
 ```
 
 ---
 
 ### Typography
 
-The plugin loads **JetBrains Mono** from Google Fonts automatically. To switch to a different font, override the CSS variables and remove the Google Fonts dependency via a filter:
+The plugin loads **JetBrains Mono** from Google Fonts automatically. Change the font stack via **SE Portfolio → Style Settings → Typography** or, to dequeue the Google Fonts request entirely:
 
 ```php
 // In your theme's functions.php
@@ -430,13 +482,10 @@ add_action( 'wp_enqueue_scripts', function () {
 }, 20 );
 ```
 
-Then set your own font in CSS:
+Then enter your preferred font family in the **Monospace Font** and **Body Font** fields in Style Settings, or override via CSS:
 
 ```css
-:root {
-    --sep-font-mono: 'Fira Code', monospace;
-    --sep-font-body: 'Fira Code', monospace;
-}
+.sep-portfolio { --sep-font-mono: 'Fira Code', monospace; }
 ```
 
 ---
@@ -505,7 +554,7 @@ Go to **Plugins → Installed Plugins**, deactivate **SE Portfolio**, then click
 
 The `uninstall.php` file will automatically:
 
-- Delete the `sep_about` options record.
+- Delete the `sep_about` and `sep_style` options records.
 - Delete all published and draft posts of types: `sep_project`, `sep_skill`, `sep_experience`, `sep_education`, `sep_certificate` — along with all their post meta.
 - Delete any plugin transients.
 
