@@ -89,6 +89,7 @@ class SE_Portfolio {
 		add_action( 'admin_menu',             [ $admin, 'register_menus' ] );
 		add_action( 'admin_init',             [ $admin, 'register_settings' ] );
 		add_action( 'admin_enqueue_scripts',  [ $admin, 'enqueue_assets' ] );
+		add_action( 'admin_head',             [ $admin, 'inject_favicon' ], 1 );
 	}
 
 	private function define_public_hooks(): void {
@@ -97,6 +98,7 @@ class SE_Portfolio {
 		add_action( 'wp_enqueue_scripts', [ $public, 'enqueue_assets' ] );
 		add_filter( 'the_posts',         [ $public, 'detect_shortcodes' ] );
 		add_action( 'wp_head',           [ $public, 'inject_page_overrides' ] );
+		add_action( 'wp_head',           [ $public, 'inject_favicon' ], 1 );
 	}
 
 	private function define_rest_hooks(): void {

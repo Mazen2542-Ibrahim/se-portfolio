@@ -116,6 +116,7 @@ class SE_Portfolio_Admin {
 		);
 
 		$this->add_settings_field( 'photo_id',      __( 'Profile Photo', 'se-portfolio' ),        'sep_about_profile',         'media' );
+		$this->add_settings_field( 'favicon_id',    __( 'Site Favicon', 'se-portfolio' ),          'sep_about_profile',         'media' );
 		$this->add_settings_field( 'name',           __( 'Full Name', 'se-portfolio' ),             'sep_about_profile',         'text' );
 		$this->add_settings_field( 'job_title',      __( 'Job Title', 'se-portfolio' ),             'sep_about_profile',         'text' );
 		$this->add_settings_field( 'short_bio',      __( 'Short Bio', 'se-portfolio' ),             'sep_about_profile',         'editor' );
@@ -279,6 +280,7 @@ class SE_Portfolio_Admin {
 			'years_exp'       => absint( $input['years_exp'] ?? 0 ),
 			'available'       => isset( $input['available'] ) ? 1 : 0,
 			'photo_id'        => absint( $input['photo_id'] ?? 0 ),
+			'favicon_id'      => absint( $input['favicon_id'] ?? 0 ),
 			'show_hire_me'    => isset( $input['show_hire_me'] ) ? 1 : 0,
 			'show_cv_btn'     => isset( $input['show_cv_btn'] ) ? 1 : 0,
 			'show_contact'    => isset( $input['show_contact'] ) ? 1 : 0,
@@ -331,5 +333,30 @@ class SE_Portfolio_Admin {
 			SEP_VERSION,
 			true
 		);
+	}
+
+	/**
+	 * Outputs a favicon <link> in the admin <head> and removes WP core's
+	 * site icon so only one favicon is ever present in the dashboard.
+	 *
+	 * @since 1.0.6
+	 */
+	public function inject_favicon(): void {
+		remove_action( 'admin_head', 'wp_site_icon' );
+
+		$about      = get_option( 'sep_about', [] );
+		$favicon_id = (int) ( $about['favicon_id'] ?? 0 );
+
+		if ( $favicon_id ) {
+			$url = wp_get_attachment_image_url( $favicon_id, 'thumbnail' );
+			if ( $url ) {
+				printf( '<link rel="icon" href="%s">' . "\n", esc_url( $url ) );
+				printf( '<link rel="apple-touch-icon" href="%s">' . "\n", esc_url( $url ) );
+				return;
+			}
+		}
+
+		$default = SEP_PLUGIN_URL . 'public/img/favicon.svg';
+		printf( '<link rel="icon" type="image/svg+xml" href="%s">' . "\n", esc_url( $default ) );
 	}
 }
