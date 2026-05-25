@@ -109,6 +109,7 @@ class SE_Portfolio {
 		add_action( 'wp_head',            [ $public, 'inject_favicon' ], 1 );
 		add_filter( 'template_include',   [ $public, 'template_404' ] );
 		add_action( 'login_enqueue_scripts', [ $public, 'enqueue_login_assets' ] );
+		add_action( 'login_head',            [ $public, 'inject_login_favicon' ], 1 );
 		add_filter( 'login_body_class',      [ $public, 'login_body_class' ] );
 		add_filter( 'login_headerurl',       [ $public, 'login_header_url' ] );
 		add_filter( 'login_headertext',      [ $public, 'login_header_text' ] );

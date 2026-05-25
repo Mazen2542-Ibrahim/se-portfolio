@@ -723,6 +723,31 @@ class SE_Portfolio_Public {
 	}
 
 	/**
+	 * Outputs a favicon <link> in the login page <head> and removes WP core's
+	 * site icon so only one favicon is ever present on the login screen.
+	 *
+	 * @since 1.1.1
+	 */
+	public function inject_login_favicon(): void {
+		remove_action( 'login_head', 'wp_site_icon' );
+
+		$about      = get_option( 'sep_about', [] );
+		$favicon_id = (int) ( $about['favicon_id'] ?? 0 );
+
+		if ( $favicon_id ) {
+			$url = wp_get_attachment_image_url( $favicon_id, 'thumbnail' );
+			if ( $url ) {
+				printf( '<link rel="icon" href="%s">' . "\n", esc_url( $url ) );
+				printf( '<link rel="apple-touch-icon" href="%s">' . "\n", esc_url( $url ) );
+				return;
+			}
+		}
+
+		$default = SEP_PLUGIN_URL . 'public/img/favicon.svg';
+		printf( '<link rel="icon" type="image/svg+xml" href="%s">' . "\n", esc_url( $default ) );
+	}
+
+	/**
 	 * Outputs a favicon <link> in <head> and removes WP core's site icon
 	 * so only one favicon is ever present.
 	 *
